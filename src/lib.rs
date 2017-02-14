@@ -1,22 +1,139 @@
 #![no_std]
 
-// This table is used to initialize MCU
+/// Table vector consist of:
+///   * Reset handler
+///   * Exception table (len = 14)
+///   * Interrupt table (len = 30)
 pub struct VectorTable {
     pub reset_handler               : fn()->!,
     pub other_interrupt_vectors     : [u32; 44],
 }
 
-//unsafe impl Sync for VectorTable {}
+/// Structure of PIO controller
+pub struct Pio {
+    pub pio_enable : u32,
+    pub pio_disable: u32,
+    pub pio_status : u32,
 
+    pub _reserved_1: u32,
 
-// The actual vector table.
-//#[link_section=".vectors"]
-//pub static VECTOR_TABLE: VectorTable = unsafe {
-//    VectorTable {
-//        reset_handler              : reset_handler,
-//        other_interrupt_vectors    : [0; 44],
-//    }
-//};
+    pub output_enable : u32,
+    pub output_disable: u32,
+    pub output_status : u32,
+
+    pub _reserved_2: u32,
+
+    pub glitch_input_filter_enable : u32,
+    pub glitch_input_filter_disable: u32,
+    pub glitch_input_filter_status : u32,
+
+    pub _reserved_3: u32,
+
+    pub set_output_data   : u32,
+    pub clear_output_data : u32,
+    pub output_data_status: u32,
+    pub pin_data_status   : u32,
+
+    pub interrupt_enable : u32,
+    pub interrupt_disable: u32,
+    pub interrupt_mask   : u32,
+    pub interrupt_status : u32,
+
+    pub multi_driver_enable : u32,
+    pub multi_driver_disable: u32,
+    pub multi_driver_status : u32,
+
+    pub _reserved_4: u32,
+
+    pub pull_up_disable   : u32,
+    pub pull_up_enable    : u32,
+    pub pad_pull_up_status: u32,
+
+    pub _reserved_5: u32,
+
+    pub peripheral_ab_select: u32,
+
+    pub _reserved_6: [u32; 3],
+
+    pub system_clock_glitch_input_filter_select                 : u32,
+    pub debouncing_input_filter_select                          : u32,
+    pub glitch_or_debouncing_input_filter_clock_selection_status: u32,
+    pub slow_clock_divider_debouncing                           : u32,
+
+    pub _reserved_7: [u32; 4],
+
+    pub output_write_enable : u32,
+    pub output_write_disable: u32,
+    pub output_write_status : u32,
+
+    pub _reserved_8: u32,
+
+    pub additional_interrupt_modes_enable : u32,
+    pub additional_interrupt_modes_disable: u32,
+    pub additional_interrupt_modes_mask   : u32,
+
+    pub _reserved_9: u32,
+
+    pub edge_select      : u32,
+    pub level_select     : u32,
+    pub edge_level_status: u32,
+
+    pub _reserved_a: u32,
+
+    pub falling_edge_low_level_select: u32,
+    pub rising_edge_high_level_select: u32,
+    pub fall_rise_low_high_status    : u32,
+
+    pub _reserved_b: u32,
+
+    pub lock_status         : u32,
+    pub write_protect_mode  : u32,
+    pub write_protect_status: u32,
+}
+
+/// And here are all controllers on the MCU
+/// The number of pins on each controller depends on the MCU type
+/// E.g. Arduino Due SAM3X8E MCU has 144 pins.
+pub const PIO_A: *mut Pio = 0x400E0E00 as *mut Pio;
+pub const PIO_B: *mut Pio = 0x400E1000 as *mut Pio;
+pub const PIO_C: *mut Pio = 0x400E1200 as *mut Pio;
+pub const PIO_D: *mut Pio = 0x400E1400 as *mut Pio;
+pub const PIO_E: *mut Pio = 0x400E1600 as *mut Pio;
+pub const PIO_F: *mut Pio = 0x400E1800 as *mut Pio;
+
+/// Here are pin masks
+pub const P0 : u32 = 0x00000001;
+pub const P1 : u32 = 0x00000002;
+pub const P2 : u32 = 0x00000004;
+pub const P3 : u32 = 0x00000008;
+pub const P4 : u32 = 0x00000010;
+pub const P5 : u32 = 0x00000020;
+pub const P6 : u32 = 0x00000040;
+pub const P7 : u32 = 0x00000080;
+pub const P8 : u32 = 0x00000100;
+pub const P9 : u32 = 0x00000200;
+pub const P10: u32 = 0x00000400;
+pub const P11: u32 = 0x00000800;
+pub const P12: u32 = 0x00001000;
+pub const P13: u32 = 0x00002000;
+pub const P14: u32 = 0x00004000;
+pub const P15: u32 = 0x00008000;
+pub const P16: u32 = 0x00010000;
+pub const P17: u32 = 0x00020000;
+pub const P18: u32 = 0x00040000;
+pub const P19: u32 = 0x00080000;
+pub const P20: u32 = 0x00100000;
+pub const P21: u32 = 0x00200000;
+pub const P22: u32 = 0x00400000;
+pub const P23: u32 = 0x00800000;
+pub const P24: u32 = 0x01000000;
+pub const P25: u32 = 0x02000000;
+pub const P26: u32 = 0x04000000;
+pub const P27: u32 = 0x08000000;
+pub const P28: u32 = 0x10000000;
+pub const P29: u32 = 0x20000000;
+pub const P30: u32 = 0x40000000;
+pub const P31: u32 = 0x80000000;
 
 
 // Addresses of several registers used to control parallel I/O.
