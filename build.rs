@@ -24,8 +24,8 @@ SECTIONS
 {
     .text :
     {
-        LONG(ORIGIN(ram) + LENGTH(ram));
         _sfixed = .;
+        LONG(ORIGIN(ram) + LENGTH(ram));
         KEEP(*(.vectors .vectors.*))
         *(.text .text.* .gnu.linkonce.t.*)
         *(.glue_7t) *(.glue_7)
