@@ -17,7 +17,7 @@ pub enum Port {
 }
 
 /// This structure is only accessible ia implementation functions
-pub struct ParallelPin {
+pub struct BinaryPin {
     controller: *mut Controller,
     mask: u32
 }
@@ -126,7 +126,7 @@ const PIO_D: *mut Controller = 0x400E1400 as *mut Controller;
 
 
 /// Pin constructor
-pub fn pin(port: Port, line: u32, mode: Mode) -> Option<ParallelPin> {
+pub fn pin(port: Port, line: u32, mode: Mode) -> Option<BinaryPin> {
     match port {
         Port::A => if line < 30 { Some(PIO_A) } else { None },
         Port::B => if line < 32 { Some(PIO_B) } else { None },
@@ -142,12 +142,12 @@ pub fn pin(port: Port, line: u32, mode: Mode) -> Option<ParallelPin> {
             }
         }
 
-        ParallelPin { controller: c, mask: mask }
+        BinaryPin { controller: c, mask: mask }
     })
 }
 
 
-impl ParallelPin {
+impl BinaryPin {
     pub fn on(&self) {
         unsafe {
             (*self.controller).set_output_data = self.mask;
