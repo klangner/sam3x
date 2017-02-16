@@ -5,27 +5,46 @@
 // See data sheet, chapter 13.
 
 
-use volatile::Volatile;
+/// Slow clock frequency Chapter 13.4
+const SLOW_CLOCK: u32 = 32768;
 
 
 // Real-time Timer user interface. See data sheet, chapter 13.5.
 #[repr(C)]
-pub struct Rtt {
-    pub mode  : Volatile<u32>,
-    pub alarm : Volatile<u32>,
-    pub value : Volatile<u32>,
-    pub status: Volatile<u32>,
+struct Timer {
+    mode  : u32,
+    alarm : u32,
+    value : u32,
+    status: u32,
 }
 
 
 // Mode register flags. See data sheet, section 13.5.1.
-pub const ALMIEN   : u32 = 0x1 << 16; // Alarm Interrupt Enable
-pub const RTTINCIEN: u32 = 0x1 << 17; // RTT Increment Interrupt Enable
-pub const RTTRST   : u32 = 0x1 << 18; // RTT Restart
+//pub const ALMIEN   : u32 = 0x1 << 16; // Alarm Interrupt Enable
+//pub const RTTINCIEN: u32 = 0x1 << 17; // RTT Increment Interrupt Enable
+//pub const RTTRST   : u32 = 0x1 << 18; // RTT Restart
 
 // Status register flags. See data sheet, section 13.5.4.
-pub const ALMS  : u32 = 0x1 << 0; // Real-time Alarm Status
-pub const RTTINC: u32 = 0x1 << 1; // Real-time Timer Increment
+//pub const ALMS  : u32 = 0x1 << 0; // Real-time Alarm Status
+//pub const RTTINC: u32 = 0x1 << 1; // Real-time Timer Increment
+
+const RTT: *mut Timer = 0x400E1A30 as *mut Timer;
 
 
-pub const RTT: *mut Rtt = 0x400E1A30 as *mut Rtt;
+/// Initialization is needed to set timer resolution
+/// The resolution will be set to 1ms.
+pub fn init_timer() {
+    unsafe {
+        let mode: u32 = SLOW_CLOCK / 1000;
+        (*RTT).mode = mode;
+    }
+}
+
+/// Wait burning cycles for given amount of milliseconds
+pub fn wait(milliseconds: u32) {
+    unsafe {
+        let sleep_until = (*RTT).value + milliseconds;
+//        if sleep_until < (*RTT).value
+        while (*RTT).value < sleep_until {}
+    }
+}
