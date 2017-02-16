@@ -9,8 +9,8 @@ pub mod rtt;
 ///   * Exception table (len = 14)
 ///   * Interrupt table (len = 30)
 pub struct VectorTable {
-    pub reset_handler               : fn()->!,
-    pub other_interrupt_vectors     : [u32; 44],
+    pub reset_handler   : fn()->!,
+    pub exceptions      : [u32; 14]
 }
 
 

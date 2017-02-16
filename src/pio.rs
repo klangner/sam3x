@@ -125,29 +125,29 @@ const PIO_D: *mut Controller = 0x400E1400 as *mut Controller;
 //const PIO_F: *mut Controller = 0x400E1800 as *mut Controller;
 
 
-/// Pin constructor
-pub fn pin(port: Port, line: u32, mode: Mode) -> Option<BinaryPin> {
-    match port {
-        Port::A => if line < 30 { Some(PIO_A) } else { None },
-        Port::B => if line < 32 { Some(PIO_B) } else { None },
-        Port::C => if line < 31 { Some(PIO_C) } else { None },
-        Port::D => if line < 10 { Some(PIO_D) } else { None },
-    }
-    .map(|c| {
-        let mask = 0x1 << line;
-        unsafe {
-            (*c).pio_enable = mask;
-            if mode == Mode::Output {
-                (*c).output_enable = mask;
-            }
-        }
-
-        BinaryPin { controller: c, mask: mask }
-    })
-}
-
-
 impl BinaryPin {
+
+    /// Activate
+    pub fn init(port: Port, line: u32, mode: Mode) -> Option<BinaryPin> {
+        match port {
+            Port::A => if line < 30 { Some(PIO_A) } else { None },
+            Port::B => if line < 32 { Some(PIO_B) } else { None },
+            Port::C => if line < 31 { Some(PIO_C) } else { None },
+            Port::D => if line < 10 { Some(PIO_D) } else { None },
+        }
+            .map(|c| {
+                let mask = 0x1 << line;
+                unsafe {
+                    (*c).pio_enable = mask;
+                    if mode == Mode::Output {
+                        (*c).output_enable = mask;
+                    }
+                }
+
+                BinaryPin { controller: c, mask: mask }
+            })
+    }
+
     pub fn on(&self) {
         unsafe {
             (*self.controller).set_output_data = self.mask;
