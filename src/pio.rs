@@ -45,10 +45,11 @@ struct Controller {
 
     _reserved_3: u32,
 
-    /// Set this line to High
+    /// Set line value to 1
     set_output_data   : u32,
-    /// Set this line to low
+    /// Set line value to 0
     clear_output_data : u32,
+    /// Get line value
     output_data_status: u32,
     pin_data_status   : u32,
 
@@ -151,6 +152,12 @@ impl BinaryPin {
     pub fn on(&self) {
         unsafe {
             (*self.controller).set_output_data = self.mask;
+        }
+    }
+
+    pub fn is_on(&self) -> bool {
+        unsafe {
+            (*self.controller).output_data_status & self.mask > 0
         }
     }
 
