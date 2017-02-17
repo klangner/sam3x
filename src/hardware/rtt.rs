@@ -46,7 +46,7 @@ pub fn init_timer() {
 }
 
 /// Wait burning cycles for given amount of milliseconds
-pub fn wait(milliseconds: u32) {
+pub fn wait_ms(milliseconds: u32) {
     unsafe {
         let sleep_until = (*RTT).value + milliseconds;
 //        if sleep_until < (*RTT).value
