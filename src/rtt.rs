@@ -1,8 +1,11 @@
 /// Based on:
 /// https://github.com/hannobraun/embedded
 ///
-// Real-time Timer code for Atmel SAM3X.
-// See data sheet, chapter 13.
+/// Real-time Timer code for Atmel SAM3X.
+/// See data sheet, chapter 13.
+
+
+use volatile::Volatile;
 
 
 /// Slow clock frequency Chapter 13.4
