@@ -1,7 +1,13 @@
 #![no_std]
 
-pub mod pio;
-pub mod rtt;
+pub mod hardware {
+    pub mod pio;
+    pub mod rtt;
+}
+pub mod drivers{
+    pub mod led;
+    mod driver;
+}
 
 
 /// Table vector consist of:

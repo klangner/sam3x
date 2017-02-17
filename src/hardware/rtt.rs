@@ -5,7 +5,9 @@
 /// See data sheet, chapter 13.
 
 
-use volatile::Volatile;
+extern crate volatile;
+
+//use volatile::Volatile;
 
 
 /// Slow clock frequency Chapter 13.4

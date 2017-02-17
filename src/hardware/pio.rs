@@ -120,10 +120,6 @@ const PIO_B: *mut Controller = 0x400E1000 as *mut Controller;
 const PIO_C: *mut Controller = 0x400E1200 as *mut Controller;
 /// SAM3X 10 lines
 const PIO_D: *mut Controller = 0x400E1400 as *mut Controller;
-// Not available on SAM3X
-//const PIO_E: *mut Controller = 0x400E1600 as *mut Controller;
-// Not available on SAM3X
-//const PIO_F: *mut Controller = 0x400E1800 as *mut Controller;
 
 
 impl BinaryPin {
