@@ -5,6 +5,10 @@
 /// See Datasheet, chapter 31.
 
 
+use volatile_register::{RO};
+use hardware::peripherals::Peripheral;
+
+
 /// Pin work modes
 #[derive(PartialEq)]
 pub enum Mode {
@@ -12,9 +16,6 @@ pub enum Mode {
     Input
 }
 
-pub enum Port {
-    A, B, C, D
-}
 
 /// This structure is only accessible ia implementation functions
 pub struct BinaryPin {
@@ -35,7 +36,7 @@ struct Controller {
     /// Set this line as output
     output_enable : u32,
     output_disable: u32,
-    output_status : u32,
+    output_status : RO<u32>,
 
     _reserved_2: u32,
 
@@ -66,7 +67,7 @@ struct Controller {
 
     pull_up_disable   : u32,
     pull_up_enable    : u32,
-    pad_pull_up_status: u32,
+    pad_pull_up_status: RO<u32>,
 
     _reserved_5: u32,
 
@@ -125,12 +126,13 @@ const PIO_D: *mut Controller = 0x400E1400 as *mut Controller;
 impl BinaryPin {
 
     /// Activate
-    pub fn init(port: Port, line: u32, mode: Mode) -> Option<BinaryPin> {
-        match port {
-            Port::A => if line < 30 { Some(PIO_A) } else { None },
-            Port::B => if line < 32 { Some(PIO_B) } else { None },
-            Port::C => if line < 31 { Some(PIO_C) } else { None },
-            Port::D => if line < 10 { Some(PIO_D) } else { None },
+    pub fn init(peripheral: Peripheral, line: u32, mode: Mode) -> Option<BinaryPin> {
+        match peripheral {
+            Peripheral::PioA => if line < 30 { Some(PIO_A) } else { None },
+            Peripheral::PioB => if line < 32 { Some(PIO_B) } else { None },
+            Peripheral::PioC => if line < 31 { Some(PIO_C) } else { None },
+            Peripheral::PioD => if line < 10 { Some(PIO_D) } else { None },
+            _ => None
         }
             .map(|c| {
                 let mask = 0x1 << line;
@@ -138,6 +140,8 @@ impl BinaryPin {
                     (*c).pio_enable = mask;
                     if mode == Mode::Output {
                         (*c).output_enable = mask;
+                    } else {
+                        (*c).pull_up_enable = mask;
                     }
                 }
 
@@ -151,15 +155,21 @@ impl BinaryPin {
         }
     }
 
-    pub fn is_on(&self) -> bool {
-        unsafe {
-            (*self.controller).output_data_status & self.mask > 0
-        }
-    }
-
     pub fn off(&self) {
         unsafe {
             (*self.controller).clear_output_data = self.mask;
+        }
+    }
+
+    pub fn is_on(&self) -> bool {
+        unsafe {
+            (*self.controller).pin_data_status & self.mask > 0
+        }
+    }
+
+    pub fn is_off(&self) -> bool {
+        unsafe {
+            (*self.controller).pin_data_status & self.mask == 0
         }
     }
 }

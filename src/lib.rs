@@ -1,12 +1,17 @@
 #![no_std]
 
+extern crate volatile_register;
+
 pub mod hardware {
+    pub mod peripherals;
     pub mod pio;
     pub mod rtt;
+    pub mod pmc;
 }
 pub mod drivers{
-    pub mod led;
     mod driver;
+    pub mod led;
+    pub mod button;
 }
 
 

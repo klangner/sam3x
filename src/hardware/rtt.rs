@@ -5,11 +5,6 @@
 /// See data sheet, chapter 13.
 
 
-extern crate volatile;
-
-//use volatile::Volatile;
-
-
 /// Slow clock frequency Chapter 13.4
 const SLOW_CLOCK: u32 = 32768;
 

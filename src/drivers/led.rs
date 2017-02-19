@@ -4,7 +4,7 @@
 
 use drivers::driver::{Driver};
 use hardware::pio::{BinaryPin, Mode};
-pub use hardware::pio::Port;
+use hardware::peripherals::{Peripheral};
 
 pub struct Led {
     pin:    BinaryPin
@@ -12,8 +12,8 @@ pub struct Led {
 
 impl Led {
     /// Connect driver to the led on a pin
-    pub fn connect(port: Port, pin: u32) -> Option<Led> {
-        BinaryPin::init(port, pin, Mode::Output).map(|p| {
+    pub fn connect(peripheral: Peripheral, line: u32) -> Option<Led> {
+        BinaryPin::init(peripheral, line, Mode::Output).map(|p| {
             Led { pin: p }
         })
     }
