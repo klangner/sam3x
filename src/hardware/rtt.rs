@@ -40,11 +40,16 @@ pub fn init_timer() {
     }
 }
 
-/// Wait burning cycles for given amount of milliseconds
-pub fn wait_ms(milliseconds: u32) {
+/// Wait burning cycles for a given amount of milliseconds
+pub fn wait_ms(sleep_ms: u32) {
     unsafe {
-        let sleep_until = (*RTT).value + milliseconds;
-//        if sleep_until < (*RTT).value
+        let sleep_until = (*RTT).value + sleep_ms;
+        // The value of (RTT+sleep_ms) can overflow if this is the case then first
+        // wait for value to overflow too
+        if sleep_until < (*RTT).value {
+
+        }
+        // No we can burn cycles.
         while (*RTT).value < sleep_until {}
     }
 }

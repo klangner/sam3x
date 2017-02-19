@@ -7,6 +7,7 @@ pub mod hardware {
     pub mod pio;
     pub mod rtt;
     pub mod pmc;
+    pub mod wdt;
 }
 pub mod drivers{
     mod driver;
