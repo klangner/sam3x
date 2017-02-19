@@ -19,6 +19,8 @@ impl Button {
         })
     }
 
+    /// Since SAM3X has pull up resistors then button is defined as pressed when
+    /// the input is in low state.
     pub fn is_pressed(&self) -> bool {
         self.pin.is_off()
     }
