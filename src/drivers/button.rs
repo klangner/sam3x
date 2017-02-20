@@ -3,18 +3,19 @@
 ///   * TBD - Set to blink with a given freq
 
 use drivers::driver::{Driver};
-use hardware::pio::{BinaryPin, Mode};
+use hardware::pio::{Pin};
 use hardware::peripherals::{Peripheral};
 
 
 pub struct Button {
-    pin:    BinaryPin
+    pin: Pin
 }
 
 impl Button {
     /// Connect driver to the led on a pin
     pub fn connect(peripheral: Peripheral, pin: u32) -> Option<Button> {
-        BinaryPin::init(peripheral, pin, Mode::Input).map(|p| {
+        Pin::init(peripheral, pin).map(|p| {
+            p.enable_input();
             Button { pin: p }
         })
     }

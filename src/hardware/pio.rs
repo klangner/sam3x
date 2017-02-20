@@ -5,26 +5,13 @@
 /// See Datasheet, chapter 31.
 
 
-use volatile_register::{RO, WO, RW};
+use volatile_register::{RO, WO};
 use hardware::peripherals::Peripheral;
 
 
-/// Pin work modes
-#[derive(PartialEq)]
-pub enum Mode {
-    Output,
-    Input
-}
-
-
-/// This structure is only accessible ia implementation functions
-pub struct BinaryPin {
-    controller: *mut Controller,
-    mask: u32
-}
-
-/// UART Tx pin
-pub struct TxPin{
+/// Pin is specific line in specific controller
+/// This structure is used to access functions on given pin.
+pub struct Pin {
     controller: *mut Controller,
     mask: u32
 }
@@ -40,8 +27,8 @@ struct Controller {
     _reserved_1: RO<u32>,
 
     /// Set this line as output
-    output_enable : RW<u32>,
-    output_disable: RW<u32>,
+    output_enable : WO<u32>,
+    output_disable: WO<u32>,
     output_status : RO<u32>,
 
     _reserved_2: RO<u32>,
@@ -53,12 +40,12 @@ struct Controller {
     _reserved_3: u32,
 
     /// Set line value to 1
-    set_output_data   : u32,
+    set_output_data   : WO<u32>,
     /// Set line value to 0
-    clear_output_data : u32,
+    clear_output_data : WO<u32>,
     /// Get line value
-    output_data_status: u32,
-    pin_data_status   : u32,
+    output_data_status: RO<u32>,
+    pin_data_status   : RO<u32>,
 
     interrupt_enable : u32,
     interrupt_disable: u32,
@@ -129,10 +116,12 @@ const PIO_C: *mut Controller = 0x400E1200 as *mut Controller;
 const PIO_D: *mut Controller = 0x400E1400 as *mut Controller;
 
 
-impl BinaryPin {
+impl Pin {
 
-    /// Activate
-    pub fn init(peripheral: Peripheral, line: u32, mode: Mode) -> Option<BinaryPin> {
+    /// Since different controllers have different line numbers, it can happen then
+    /// the provided parameters will not match with existing architecture.
+    /// That's why we return Option
+    pub fn init(peripheral: Peripheral, line: u32) -> Option<Pin> {
         match peripheral {
             Peripheral::PioA => if line < 30 { Some(PIO_A) } else { None },
             Peripheral::PioB => if line < 32 { Some(PIO_B) } else { None },
@@ -140,54 +129,52 @@ impl BinaryPin {
             Peripheral::PioD => if line < 10 { Some(PIO_D) } else { None },
             _ => None
         }
-            .map(|c| {
-                let mask = 0x1 << line;
-                unsafe {
-                    (*c).pio_enable.write((*c).pio_status.read() | mask);
-                    if mode == Mode::Output {
-                        (*c).output_enable.write((*c).output_status.read() | mask);
-                    } else {
-                        (*c).pull_up_enable.write((*c).pull_up_status.read() | mask);
-                    }
-                }
+        .map(|c| {
+            let mask = 0x1 << line;
+            Pin { controller: c, mask: mask }
+        })
+    }
 
-                BinaryPin { controller: c, mask: mask }
-            })
+    pub fn enable_output(&self) {
+        unsafe {
+            (*self.controller).pio_enable.write((*self.controller).pio_status.read() | self.mask);
+            (*self.controller).output_enable.write((*self.controller).output_status.read() | self.mask);
+        }
+    }
+
+    pub fn enable_input(&self) {
+        unsafe { (*self.controller).pio_enable.write((*self.controller).pio_status.read() | self.mask); }
+        self.enable_pull_up();
+    }
+
+    pub fn enable_pull_up(&self) {
+        unsafe {
+            (*self.controller).pull_up_enable.write((*self.controller).pull_up_status.read() | self.mask);
+        }
     }
 
     pub fn on(&self) {
         unsafe {
-            (*self.controller).set_output_data = self.mask;
+            (*self.controller).set_output_data.write((*self.controller).output_data_status.read() | self.mask);
         }
     }
 
     pub fn off(&self) {
         unsafe {
-            (*self.controller).clear_output_data = self.mask;
+            (*self.controller).clear_output_data.write((*self.controller).output_data_status.read() | self.mask);
         }
     }
 
     pub fn is_on(&self) -> bool {
         unsafe {
-            (*self.controller).pin_data_status & self.mask > 0
+            (*self.controller).pin_data_status.read() & self.mask > 0
         }
     }
 
     pub fn is_off(&self) -> bool {
         unsafe {
-            (*self.controller).pin_data_status & self.mask == 0
+            (*self.controller).pin_data_status.read() & self.mask == 0
         }
     }
 }
 
-//impl TxPin {
-//    pub fn init() -> TxPin {
-//        let tx_pin = unsafe { pio::a().pin_9() };
-//        let mut tx_pin = tx_pin
-//            .disable()
-//            .enable_pull_up();
-//
-//        TxPin{ controller: PIO_A, mask: 1 << 9}
-//    }
-//}
-//
