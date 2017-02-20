@@ -5,7 +5,7 @@
 /// See Datasheet, chapter 31.
 
 
-use volatile_register::{RO, WO};
+use volatile_register::{RO, WO, RW};
 use hardware::peripherals::Peripheral;
 
 
@@ -64,7 +64,7 @@ struct Controller {
 
     _reserved_5: u32,
 
-    peripheral_ab_select: u32,
+    peripheral_ab_select: RW<u32>,
 
     _reserved_6: [u32; 3],
 
@@ -174,6 +174,13 @@ impl Pin {
     pub fn is_off(&self) -> bool {
         unsafe {
             (*self.controller).pin_data_status.read() & self.mask == 0
+        }
+    }
+
+    pub fn select_peripheral_a(&self) {
+        unsafe {
+            let state = (*self.controller).peripheral_ab_select.read();
+            (*self.controller).peripheral_ab_select.write(state & !self.mask);
         }
     }
 }
