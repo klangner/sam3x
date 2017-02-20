@@ -6,8 +6,7 @@
 /// See data sheet, chapter 13.
 
 
-/// Slow clock frequency Chapter 13.4
-const SLOW_CLOCK: u32 = 32768;
+use hardware::pmc;
 
 
 // Real-time Timer user interface. See data sheet, chapter 13.5.
@@ -36,7 +35,7 @@ const RTT: *mut Timer = 0x400E1A30 as *mut Timer;
 /// The resolution will be set to 1ms.
 pub fn init_timer() {
     unsafe {
-        let mode: u32 = SLOW_CLOCK / 1000;
+        let mode: u32 = pmc::SLOW_CLOCK_FREQUENCY_HZ / 1000;
         (*RTT).mode = mode;
     }
 }

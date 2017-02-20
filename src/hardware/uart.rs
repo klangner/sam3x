@@ -3,7 +3,8 @@
 // See data sheet, chapter 34.
 
 
-use volatile_register::{WO, RO};
+use core::fmt;
+use volatile_register::{WO, RO, RW};
 use hardware::peripherals::{Peripheral};
 use hardware::pdc::{Pdc};
 use hardware::pio::{Pin};
@@ -19,14 +20,14 @@ pub struct Tx {
 #[repr(C)]
 struct Uart {
     control            : WO<u32>,
-    mode               : WO<u32>,
-    interrupt_enable   : RO<u32>,
-    interrupt_disable  : RO<u32>,
+    mode               : RW<u32>,
+    interrupt_enable   : WO<u32>,
+    interrupt_disable  : WO<u32>,
     interrupt_mask     : RO<u32>,
     status             : RO<u32>,
     receive_holding    : RO<u32>,
-    transmit_holding   : RO<u32>,
-    baud_rate_generator: WO<u32>,
+    transmit_holding   : WO<u32>,
+    baud_rate_generator: RW<u32>,
 
     _reserved: [RO<u32>; 55],
 
@@ -35,7 +36,9 @@ struct Uart {
 
 
 // Available bound rates
+pub const BR_1200: u32 = 1200;
 pub const BR_9600: u32 = 9600;
+pub const BR_19200: u32 = 19200;
 
 // Control register bits. See data sheet, chapter 34.6.1.
 const RSTRX : u32 = 0x1 << 2; // Reset Receiver
@@ -52,7 +55,7 @@ const PARITY_EVEN : u32 = 0x0 << 9;
 const PARITY_ODD  : u32 = 0x1 << 9;
 const PARITY_SPACE: u32 = 0x2 << 9; // parity forced to 0
 const PARITY_MARK : u32 = 0x3 << 9; // parity forced to 1
-const PARITY_NO   : u32 = 0x4 << 9;
+const PARITY_NONE: u32 = 0x4 << 9;
 
 // UART modes, to be written into the mode register. See data sheet, chapter
 // 34.6.2.
@@ -80,16 +83,53 @@ const UART: *mut Uart = 0x400E0800 as *mut Uart;
 impl Tx {
     pub fn init(bound_rate: u32) -> Tx {
         let pin = Pin::init(Peripheral::PioA, 9).expect("Can't connect to he Tx pin");
+        pin.disable();
+        pin.enable_pull_up();
+        pin.select_peripheral_a();
         unsafe {
+            pmc::enable_peripheral_clock_0(Peripheral::Uart);
             (*UART).control.write(RSTRX | RSTTX | RXDIS | TXDIS);
             // Set bound rate
-            let clock_divisor = pmc::main_clock_frequency_hz() / bound_rate / 16;
+            let clock_divisor = pmc::main_clock_frequency_hz() / (bound_rate * 16);
             (*UART).baud_rate_generator.write(clock_divisor);
-            // Put UART into normal mode and do not use a parity bit.
-            (*UART).mode.write(MODE_NORMAL | PARITY_NO);
+            // Put UART into normal mode and use a parity bit.
+            (*UART).mode.write(MODE_NORMAL | PARITY_NONE);
             (*UART).control.write(RXEN | TXEN);
         }
-        pin.select_peripheral_a();
         Tx { pin: pin }
+    }
+
+    pub fn write_byte(&self, b: u8) {
+        unsafe {
+            // Wait until transmitter is ready. See data sheet, sections
+            // 34.5.3.3 and 34.6.6.
+            while (*UART).status.read() & TXRDY == 0 {}
+
+            // Send byte. See data sheet, sections 34.5.3.3 and 34.6.8.
+            (*UART).transmit_holding.write(b as u32);
+        }
+    }
+
+    pub fn write(&self, s: &str){
+        for &b in s.as_bytes() {
+            self.write_byte(b);
+        }
+        unsafe {
+            while (*UART).status.read() & TXEMPTY == 0 {}
+        }
+    }
+
+}
+
+
+impl fmt::Write for Tx {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        for &b in s.as_bytes() {
+            self.write_byte(b);
+        }
+        unsafe {
+            while (*UART).status.read() & TXEMPTY == 0 {}
+        }
+        Ok(())
     }
 }

@@ -77,7 +77,7 @@ pub const MAINF_MASK: u32 = 0x0000ffff;
 pub const PMC: *mut Pmc = 0x400E0600 as *mut Pmc;
 
 /// This function have to be called before we can use Pio is input
-pub fn enable_peripheral_clk(peripheral: Peripheral) {
+pub fn enable_peripheral_clock_0(peripheral: Peripheral) {
     unsafe {
         (*PMC).peripheral_clock_enable_0.write(peripheral.mask());
     }
@@ -90,6 +90,5 @@ pub fn main_clock_frequency_hz() -> u32 {
         (*PMC).main_clock_frequency.read() & MAINF_MASK
     };
 
-    main_clock_frequency_within_16_slow_clock_cycles
-        * SLOW_CLOCK_FREQUENCY_HZ / 16
+    (main_clock_frequency_within_16_slow_clock_cycles * SLOW_CLOCK_FREQUENCY_HZ) / 16
 }

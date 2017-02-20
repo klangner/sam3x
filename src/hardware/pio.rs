@@ -135,33 +135,39 @@ impl Pin {
         })
     }
 
+    pub fn disable(&self) {
+        unsafe {
+            (*self.controller).pio_disable.write(self.mask);
+        }
+    }
+
     pub fn enable_output(&self) {
         unsafe {
-            (*self.controller).pio_enable.write((*self.controller).pio_status.read() | self.mask);
-            (*self.controller).output_enable.write((*self.controller).output_status.read() | self.mask);
+            (*self.controller).pio_enable.write(self.mask);
+            (*self.controller).output_enable.write(self.mask);
         }
     }
 
     pub fn enable_input(&self) {
-        unsafe { (*self.controller).pio_enable.write((*self.controller).pio_status.read() | self.mask); }
+        unsafe { (*self.controller).pio_enable.write(self.mask); }
         self.enable_pull_up();
     }
 
     pub fn enable_pull_up(&self) {
         unsafe {
-            (*self.controller).pull_up_enable.write((*self.controller).pull_up_status.read() | self.mask);
+            (*self.controller).pull_up_enable.write(self.mask);
         }
     }
 
     pub fn on(&self) {
         unsafe {
-            (*self.controller).set_output_data.write((*self.controller).output_data_status.read() | self.mask);
+            (*self.controller).set_output_data.write(self.mask);
         }
     }
 
     pub fn off(&self) {
         unsafe {
-            (*self.controller).clear_output_data.write((*self.controller).output_data_status.read() | self.mask);
+            (*self.controller).clear_output_data.write(self.mask);
         }
     }
 
