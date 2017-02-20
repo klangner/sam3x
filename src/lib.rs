@@ -3,11 +3,14 @@
 extern crate volatile_register;
 
 pub mod hardware {
+    pub mod pdc;
     pub mod peripherals;
     pub mod pio;
-    pub mod rtt;
     pub mod pmc;
+    pub mod rtt;
+    pub mod uart;
     pub mod wdt;
+
 }
 pub mod drivers{
     mod driver;

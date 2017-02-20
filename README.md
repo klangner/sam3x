@@ -3,5 +3,5 @@
 
 # Additional resources
 
+  * http://hannobraun.de/embedded/ (Lot of code is taken from this repository)
   * https://github.com/japaric/discovery
-  * http://hannobraun.de/embedded/

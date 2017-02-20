@@ -5,7 +5,7 @@
 /// See Datasheet, chapter 31.
 
 
-use volatile_register::{RO};
+use volatile_register::{RO, WO, RW};
 use hardware::peripherals::Peripheral;
 
 
@@ -23,22 +23,28 @@ pub struct BinaryPin {
     mask: u32
 }
 
+/// UART Tx pin
+pub struct TxPin{
+    controller: *mut Controller,
+    mask: u32
+}
+
 /// Structure of PIO controller
 #[allow(dead_code)]
 struct Controller {
     /// Activate Line.
-    pio_enable : u32,
-    pio_disable: u32,
-    pio_status : u32,
+    pio_enable : WO<u32>,
+    pio_disable: WO<u32>,
+    pio_status : RO<u32>,
 
-    _reserved_1: u32,
+    _reserved_1: RO<u32>,
 
     /// Set this line as output
-    output_enable : u32,
-    output_disable: u32,
+    output_enable : RW<u32>,
+    output_disable: RW<u32>,
     output_status : RO<u32>,
 
-    _reserved_2: u32,
+    _reserved_2: RO<u32>,
 
     glitch_input_filter_enable : u32,
     glitch_input_filter_disable: u32,
@@ -65,9 +71,9 @@ struct Controller {
 
     _reserved_4: u32,
 
-    pull_up_disable   : u32,
-    pull_up_enable    : u32,
-    pad_pull_up_status: RO<u32>,
+    pull_up_disable   : WO<u32>,
+    pull_up_enable    : WO<u32>,
+    pull_up_status    : RO<u32>,
 
     _reserved_5: u32,
 
@@ -137,11 +143,11 @@ impl BinaryPin {
             .map(|c| {
                 let mask = 0x1 << line;
                 unsafe {
-                    (*c).pio_enable = mask;
+                    (*c).pio_enable.write((*c).pio_status.read() | mask);
                     if mode == Mode::Output {
-                        (*c).output_enable = mask;
+                        (*c).output_enable.write((*c).output_status.read() | mask);
                     } else {
-                        (*c).pull_up_enable = mask;
+                        (*c).pull_up_enable.write((*c).pull_up_status.read() | mask);
                     }
                 }
 
@@ -173,3 +179,15 @@ impl BinaryPin {
         }
     }
 }
+
+//impl TxPin {
+//    pub fn init() -> TxPin {
+//        let tx_pin = unsafe { pio::a().pin_9() };
+//        let mut tx_pin = tx_pin
+//            .disable()
+//            .enable_pull_up();
+//
+//        TxPin{ controller: PIO_A, mask: 1 << 9}
+//    }
+//}
+//
