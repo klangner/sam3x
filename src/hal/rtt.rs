@@ -6,7 +6,7 @@
 /// See data sheet, chapter 13.
 
 
-use hardware::pmc;
+use hal::pmc;
 
 
 // Real-time Timer user interface. See data sheet, chapter 13.5.

@@ -6,7 +6,7 @@
 
 
 use volatile_register::{RO, WO, RW};
-use hardware::peripherals::Peripheral;
+use hal::peripherals::Peripheral;
 
 
 /// Pin is specific line in specific controller

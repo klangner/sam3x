@@ -3,8 +3,8 @@
 ///   * TBD - Set to blink with a given freq
 
 use drivers::driver::{Driver};
-use hardware::pio::{Pin};
-use hardware::peripherals::{Peripheral};
+use hal::pio::{Pin};
+use hal::peripherals::{Peripheral};
 
 
 pub struct Button {

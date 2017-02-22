@@ -2,7 +2,7 @@
 
 extern crate volatile_register;
 
-pub mod hardware {
+pub mod hal {
     pub mod pdc;
     pub mod peripherals;
     pub mod pio;

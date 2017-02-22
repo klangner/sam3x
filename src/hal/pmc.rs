@@ -2,7 +2,7 @@
 // See data sheet, chapter 28.
 
 use volatile_register::{WO, RO};
-use hardware::peripherals::{Peripheral};
+use hal::peripherals::{Peripheral};
 
 
 /// Power Management Controller user interface. See data sheet, chapter 28.15.

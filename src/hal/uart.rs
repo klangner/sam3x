@@ -5,10 +5,10 @@
 
 use core::fmt;
 use volatile_register::{WO, RO, RW};
-use hardware::peripherals::{Peripheral};
-use hardware::pdc::{Pdc};
-use hardware::pio::{Pin};
-use hardware::pmc;
+use hal::peripherals::{Peripheral};
+use hal::pdc::{Pdc};
+use hal::pio::{Pin};
+use hal::pmc;
 
 
 pub struct Tx {
