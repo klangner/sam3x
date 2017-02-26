@@ -4,6 +4,10 @@
 
 use volatile_register::{WO, RO};
 
+extern {
+    fn WDT_Restart(wdt: *mut u32);
+}
+
 
 /// User interface for the Watchdog Timer. See Datasheet, chapter 15.5.
 #[repr(C)]
@@ -22,5 +26,6 @@ pub const WDT: *mut Wdt = 0x400E1A50 as *mut Wdt;
 pub fn restart_watchdog() {
     unsafe {
         (*WDT).control.write(0xA5000001);
+//        unsafe { WDT_Restart(0x400E1A50 as *mut u32) };
     }
 }
