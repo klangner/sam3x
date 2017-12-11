@@ -126,7 +126,7 @@ impl Pin {
             Peripheral::PioA => if line < 30 { Some(PIO_A) } else { None },
             Peripheral::PioB => if line < 32 { Some(PIO_B) } else { None },
             Peripheral::PioC => if line < 31 { Some(PIO_C) } else { None },
-            Peripheral::PioD => if line < 10 { Some(PIO_D) } else { None },
+            Peripheral::PioD => if line < 11 { Some(PIO_D) } else { None },
             _ => None
         }
         .map(|c| {
